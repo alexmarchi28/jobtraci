@@ -47,6 +47,8 @@ Backend:
 - C#
 - ASP.NET Core Web API
 - .NET 10
+- Entity Framework Core
+- PostgreSQL
 
 Frontend:
 
@@ -60,6 +62,7 @@ Tools:
 
 - Angular CLI
 - npm
+- dotnet-ef
 - Vitest for frontend tests
 
 ## Current Project Status
@@ -67,20 +70,15 @@ Tools:
 This is an initial working version focused on validating the complete application flow:
 
 ```text
-Angular frontend -> HTTP request -> ASP.NET Core backend -> JSON response -> UI update
+Angular frontend -> HTTP request -> ASP.NET Core backend -> Entity Framework Core -> PostgreSQL -> JSON response -> UI update
 ```
 
-For now, data is stored in memory on the backend. This means that job offers created, edited, or deleted through the UI are available only while the backend process is running, and they are reset when the backend restarts.
-
-This is intentional: the first goal was to build and verify the communication between frontend and backend. The project can later be extended with a real database.
+Job applications are persisted in PostgreSQL through Entity Framework Core. The backend includes an initial migration that creates the `job_applications` table and inserts a small set of demo records.
 
 ## Possible Future Improvements
 
 Planned next steps include:
 
-- PostgreSQL integration
-- Entity Framework Core integration
-- database migrations
 - filters by status, contract type, and company
 - text search
 - sorting job applications
@@ -108,6 +106,8 @@ You need:
 - Node.js
 - npm
 - Angular CLI
+- PostgreSQL
+- dotnet-ef
 
 You can check your installations with:
 
@@ -116,7 +116,33 @@ dotnet --version
 node -v
 npm -v
 ng version
+dotnet ef --version
+psql --version
 ```
+
+### Database Setup
+
+Create a local PostgreSQL database and user matching the development connection string:
+
+```bash
+sudo -u postgres psql
+```
+
+Inside `psql`:
+
+```sql
+CREATE USER jobtracker_user WITH PASSWORD 'devpassword';
+CREATE DATABASE jobtracker_dev OWNER jobtracker_user;
+\q
+```
+
+The development connection string is defined in `JobTracker.Api/appsettings.Development.json`:
+
+```text
+Host=localhost;Port=5432;Database=jobtracker_dev;Username=jobtracker_user;Password=devpassword
+```
+
+This is only a local development setup. Use a different password or environment-specific configuration for anything outside local development.
 
 ### Install Dependencies
 
@@ -131,6 +157,13 @@ Then install the frontend dependencies:
 ```bash
 cd frontend
 npm install
+```
+
+Apply the Entity Framework migration:
+
+```bash
+cd ..
+dotnet ef database update --project JobTracker.Api/JobTracker.Api.csproj --startup-project JobTracker.Api/JobTracker.Api.csproj
 ```
 
 ### Start The Backend
@@ -184,6 +217,12 @@ Run frontend tests:
 ```bash
 cd frontend
 npm test -- --watch=false
+```
+
+Add a new Entity Framework migration after changing backend models:
+
+```bash
+dotnet ef migrations add MigrationName --project JobTracker.Api/JobTracker.Api.csproj --startup-project JobTracker.Api/JobTracker.Api.csproj --output-dir Migrations
 ```
 
 ## Note

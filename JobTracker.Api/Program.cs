@@ -1,6 +1,11 @@
+using JobTracker.Api.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 const string angularDevPolicy = "AngularDev";
+var connectionString = builder.Configuration.GetConnectionString("JobTrackerDb")
+    ?? throw new InvalidOperationException("Connection string 'JobTrackerDb' was not found.");
 
 builder.Services.AddCors(options =>
 {
@@ -11,6 +16,10 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+});
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
 });
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
