@@ -73,7 +73,7 @@ This is an initial working version focused on validating the complete applicatio
 Angular frontend -> HTTP request -> ASP.NET Core backend -> Entity Framework Core -> PostgreSQL -> JSON response -> UI update
 ```
 
-Job applications are persisted in PostgreSQL through Entity Framework Core. The backend includes an initial migration that creates the `job_applications` table and inserts a small set of demo records.
+Job applications are persisted in PostgreSQL through Entity Framework Core. The backend includes migrations that create and update the `job_applications` table.
 
 ## Possible Future Improvements
 
