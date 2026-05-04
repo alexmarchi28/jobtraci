@@ -1,0 +1,91 @@
+<main class="page-shell">
+  <section class="status-panel">
+    <div>
+      <p class="eyebrow">Job Tracker</p>
+      <h1>Frontend Angular + Backend ASP.NET Core</h1>
+      <p class="lead">
+        Questa schermata chiama davvero il backend locale e mostra i dati demo restituiti dalle API.
+      </p>
+    </div>
+
+    <button type="button" (click)="loadBackendData()" [disabled]="isLoading()">
+      {{ isLoading() ? 'Caricamento...' : 'Riprova chiamata API' }}
+    </button>
+  </section>
+
+  <section class="connection" [class.connection-ok]="health()" [class.connection-error]="error()">
+    <div class="connection-dot"></div>
+    <div>
+      <strong>
+        @if (health()) {
+          Backend connesso
+        } @else if (error()) {
+          Backend non connesso
+        } @else {
+          Controllo connessione...
+        }
+      </strong>
+      <p>
+        @if (health(); as apiHealth) {
+          {{ apiHealth.application }} ha risposto con stato "{{ apiHealth.status }}" alle
+          {{ apiHealth.serverTimeUtc | date:'HH:mm:ss':'UTC' }} UTC.
+        } @else if (error()) {
+          {{ error() }}
+        } @else {
+          Chiamata a http://localhost:5000/api/health in corso.
+        }
+      </p>
+    </div>
+  </section>
+
+  <section class="jobs-section">
+    <div class="section-heading">
+      <h2>Candidature demo</h2>
+      <span>{{ jobs().length }} record da /api/jobs</span>
+    </div>
+
+    <div class="jobs-grid">
+      @for (job of jobs(); track job.id) {
+        <article class="job-card">
+          <div class="job-card-header">
+            <div>
+              <h3>{{ job.role }}</h3>
+              <p>{{ job.company }}</p>
+            </div>
+            <span>{{ job.status }}</span>
+          </div>
+
+          <dl>
+            <div>
+              <dt>Sede</dt>
+              <dd>{{ job.location }}</dd>
+            </div>
+            <div>
+              <dt>Contratto</dt>
+              <dd>{{ job.contractType }}</dd>
+            </div>
+            <div>
+              <dt>RAL</dt>
+              <dd>
+                @if (job.salaryMin && job.salaryMax) {
+                  {{ job.salaryMin | currency:'EUR':'symbol':'1.0-0' }} -
+                  {{ job.salaryMax | currency:'EUR':'symbol':'1.0-0' }}
+                } @else {
+                  Non indicata
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Data</dt>
+              <dd>{{ job.applicationDate | date:'dd/MM/yyyy' }}</dd>
+            </div>
+          </dl>
+
+          <p class="notes">{{ job.notes }}</p>
+        </article>
+      } @empty {
+        <p class="empty-state">Nessuna candidatura ricevuta dal backend.</p>
+      }
+    </div>
+  </section>
+</main>
