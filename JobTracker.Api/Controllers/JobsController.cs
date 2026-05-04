@@ -67,9 +67,7 @@ public sealed class JobsController : ControllerBase
     [HttpPost]
     public ActionResult<JobApplicationDto> Create(CreateJobApplicationDto request)
     {
-        if (request.SalaryMin.HasValue &&
-            request.SalaryMax.HasValue &&
-            request.SalaryMin.Value > request.SalaryMax.Value)
+        if (HasInvalidSalaryRange(request.SalaryMin, request.SalaryMax))
         {
             ModelState.AddModelError(nameof(request.SalaryMax), "La RAL massima deve essere maggiore o uguale alla RAL minima.");
             return ValidationProblem(ModelState);
@@ -99,6 +97,53 @@ public sealed class JobsController : ControllerBase
         }
 
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+    }
+
+    [HttpPut("{id:int}")]
+    public ActionResult<JobApplicationDto> Update(int id, UpdateJobApplicationDto request)
+    {
+        if (HasInvalidSalaryRange(request.SalaryMin, request.SalaryMax))
+        {
+            ModelState.AddModelError(nameof(request.SalaryMax), "La RAL massima deve essere maggiore o uguale alla RAL minima.");
+            return ValidationProblem(ModelState);
+        }
+
+        JobApplicationDto updated;
+
+        lock (JobsLock)
+        {
+            var index = Jobs.FindIndex(job => job.Id == id);
+
+            if (index < 0)
+            {
+                return NotFound();
+            }
+
+            updated = new JobApplicationDto(
+                Id: id,
+                Company: request.Company.Trim(),
+                Role: request.Role.Trim(),
+                Location: request.Location.Trim(),
+                SalaryMin: request.SalaryMin,
+                SalaryMax: request.SalaryMax,
+                ContractType: request.ContractType.Trim(),
+                Status: request.Status.Trim(),
+                ApplicationDate: request.ApplicationDate!.Value,
+                ContactName: NormalizeOptionalText(request.ContactName),
+                PostingUrl: NormalizeOptionalText(request.PostingUrl),
+                Notes: NormalizeOptionalText(request.Notes));
+
+            Jobs[index] = updated;
+        }
+
+        return Ok(updated);
+    }
+
+    private static bool HasInvalidSalaryRange(decimal? salaryMin, decimal? salaryMax)
+    {
+        return salaryMin.HasValue &&
+            salaryMax.HasValue &&
+            salaryMin.Value > salaryMax.Value;
     }
 
     private static string? NormalizeOptionalText(string? value)

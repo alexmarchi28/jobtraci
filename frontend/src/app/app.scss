@@ -77,6 +77,11 @@ button:disabled {
   opacity: 0.7;
 }
 
+.secondary-button {
+  color: #263445;
+  background: #e7ecf3;
+}
+
 .connection {
   display: flex;
   gap: 14px;
@@ -112,6 +117,11 @@ button:disabled {
 
 .job-form {
   padding: 22px;
+}
+
+.job-form.editing {
+  border-color: #1f6f58;
+  box-shadow: 0 12px 36px rgba(31, 111, 88, 0.16);
 }
 
 .form-grid {
@@ -211,13 +221,54 @@ textarea:focus {
 }
 
 .job-card {
+  position: relative;
   padding: 22px;
+}
+
+.edit-job-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  min-height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid #cfd7e3;
+  border-radius: 50%;
+  color: #263445;
+  background: #ffffff;
+  box-shadow: 0 8px 22px rgba(30, 41, 59, 0.16);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
+}
+
+.edit-job-button::before {
+  content: "\270E";
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.job-card:hover .edit-job-button,
+.edit-job-button:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.edit-job-button:hover,
+.edit-job-button:focus-visible {
+  border-color: #1f6f58;
+  transform: translateY(-1px);
+  outline: none;
 }
 
 .job-card-header {
   display: flex;
   justify-content: space-between;
   gap: 16px;
+  padding-right: 38px;
 }
 
 .job-card-header h3 {
@@ -292,5 +343,10 @@ dd {
   .form-actions {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .edit-job-button {
+    opacity: 1;
+    pointer-events: auto;
   }
 }

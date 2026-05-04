@@ -24,7 +24,7 @@ interface JobApplication {
   notes: string | null;
 }
 
-interface CreateJobApplication {
+interface SaveJobApplicationPayload {
   company: string;
   role: string;
   location: string;
@@ -70,6 +70,7 @@ export class App {
   protected readonly isSaving = signal(false);
   protected readonly saveMessage = signal<string | null>(null);
   protected readonly saveError = signal<string | null>(null);
+  protected readonly editingJobId = signal<number | null>(null);
 
   protected readonly jobForm = this.formBuilder.group({
     company: ['', [Validators.required, Validators.maxLength(120)]],
@@ -103,7 +104,7 @@ export class App {
 
     this.http.get<JobApplication[]>(`${this.apiBaseUrl}/jobs`).subscribe({
       next: (jobs) => {
-        this.jobs.set(jobs);
+        this.jobs.set(this.sortJobs(jobs));
         this.isLoading.set(false);
       },
       error: () => {
@@ -113,7 +114,7 @@ export class App {
     });
   }
 
-  protected createJob(): void {
+  protected saveJob(): void {
     this.saveMessage.set(null);
     this.saveError.set(null);
 
@@ -135,31 +136,66 @@ export class App {
     }
 
     this.isSaving.set(true);
+    const editingId = this.editingJobId();
 
-    this.http.post<JobApplication>(`${this.apiBaseUrl}/jobs`, payload).subscribe({
-      next: (createdJob) => {
-        this.jobs.update((jobs) => [createdJob, ...jobs]);
-        this.jobForm.reset({
-          company: '',
-          role: '',
-          location: '',
-          salaryMin: null,
-          salaryMax: null,
-          contractType: 'Apprendistato',
-          status: 'Da valutare',
-          applicationDate: this.todayIsoDate(),
-          contactName: '',
-          postingUrl: '',
-          notes: ''
-        });
-        this.saveMessage.set(`Offerta aggiunta: ${createdJob.company} - ${createdJob.role}`);
+    if (editingId === null) {
+      this.http.post<JobApplication>(`${this.apiBaseUrl}/jobs`, payload).subscribe({
+        next: (createdJob) => {
+          this.jobs.update((jobs) => this.sortJobs([createdJob, ...jobs]));
+          this.resetForm();
+          this.saveMessage.set(`Offerta aggiunta: ${createdJob.company} - ${createdJob.role}`);
+          this.isSaving.set(false);
+        },
+        error: () => {
+          this.saveError.set('Salvataggio non riuscito. Controlla che il backend sia avviato.');
+          this.isSaving.set(false);
+        }
+      });
+
+      return;
+    }
+
+    this.http.put<JobApplication>(`${this.apiBaseUrl}/jobs/${editingId}`, payload).subscribe({
+      next: (updatedJob) => {
+        this.jobs.update((jobs) =>
+          this.sortJobs(jobs.map((job) => job.id === updatedJob.id ? updatedJob : job))
+        );
+        this.resetForm();
+        this.saveMessage.set(`Offerta aggiornata: ${updatedJob.company} - ${updatedJob.role}`);
         this.isSaving.set(false);
       },
       error: () => {
-        this.saveError.set('Salvataggio non riuscito. Controlla che il backend sia avviato.');
+        this.saveError.set('Modifica non riuscita. Controlla che il backend sia avviato.');
         this.isSaving.set(false);
       }
     });
+  }
+
+  protected beginEdit(job: JobApplication): void {
+    this.editingJobId.set(job.id);
+    this.saveMessage.set(null);
+    this.saveError.set(null);
+    this.jobForm.reset({
+      company: job.company,
+      role: job.role,
+      location: job.location,
+      salaryMin: job.salaryMin,
+      salaryMax: job.salaryMax,
+      contractType: job.contractType,
+      status: job.status,
+      applicationDate: job.applicationDate,
+      contactName: job.contactName ?? '',
+      postingUrl: job.postingUrl ?? '',
+      notes: job.notes ?? ''
+    });
+
+    document.querySelector('.job-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  protected cancelEdit(): void {
+    this.resetForm();
+    this.saveMessage.set(null);
+    this.saveError.set(null);
   }
 
   protected isInvalid(controlName: keyof typeof this.jobForm.controls): boolean {
@@ -168,7 +204,7 @@ export class App {
     return control.invalid && (control.dirty || control.touched);
   }
 
-  private buildCreatePayload(): CreateJobApplication {
+  private buildCreatePayload(): SaveJobApplicationPayload {
     const raw = this.jobForm.getRawValue();
 
     return {
@@ -190,6 +226,31 @@ export class App {
     const normalized = value?.trim();
 
     return normalized ? normalized : null;
+  }
+
+  private resetForm(): void {
+    this.editingJobId.set(null);
+    this.jobForm.reset({
+      company: '',
+      role: '',
+      location: '',
+      salaryMin: null,
+      salaryMax: null,
+      contractType: 'Apprendistato',
+      status: 'Da valutare',
+      applicationDate: this.todayIsoDate(),
+      contactName: '',
+      postingUrl: '',
+      notes: ''
+    });
+  }
+
+  private sortJobs(jobs: JobApplication[]): JobApplication[] {
+    return [...jobs].sort((left, right) => {
+      const dateComparison = right.applicationDate.localeCompare(left.applicationDate);
+
+      return dateComparison || left.company.localeCompare(right.company);
+    });
   }
 
   private todayIsoDate(): string {

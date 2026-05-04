@@ -40,11 +40,11 @@
 
   <section class="jobs-section">
     <div class="section-heading">
-      <h2>Nuova offerta</h2>
-      <span>POST /api/jobs</span>
+      <h2>{{ editingJobId() === null ? 'Nuova offerta' : 'Modifica offerta' }}</h2>
+      <span>{{ editingJobId() === null ? 'POST /api/jobs' : 'PUT /api/jobs/{id}' }}</span>
     </div>
 
-    <form class="job-form" [formGroup]="jobForm" (ngSubmit)="createJob()">
+    <form class="job-form" [class.editing]="editingJobId() !== null" [formGroup]="jobForm" (ngSubmit)="saveJob()">
       <div class="form-grid">
         <label>
           <span>Azienda</span>
@@ -135,8 +135,20 @@
 
       <div class="form-actions">
         <button type="submit" [disabled]="isSaving()">
-          {{ isSaving() ? 'Salvataggio...' : 'Aggiungi offerta' }}
+          @if (isSaving()) {
+            Salvataggio...
+          } @else if (editingJobId() === null) {
+            Aggiungi offerta
+          } @else {
+            Salva modifiche
+          }
         </button>
+
+        @if (editingJobId() !== null) {
+          <button class="secondary-button" type="button" (click)="cancelEdit()" [disabled]="isSaving()">
+            Annulla
+          </button>
+        }
 
         @if (saveMessage()) {
           <p class="form-message">{{ saveMessage() }}</p>
@@ -158,6 +170,14 @@
     <div class="jobs-grid">
       @for (job of jobs(); track job.id) {
         <article class="job-card">
+          <button
+            class="edit-job-button"
+            type="button"
+            aria-label="Modifica offerta"
+            title="Modifica offerta"
+            (click)="beginEdit(job)"
+          ></button>
+
           <div class="job-card-header">
             <div>
               <h3>{{ job.role }}</h3>
