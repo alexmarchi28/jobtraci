@@ -14,6 +14,7 @@
 
 .status-panel,
 .connection,
+.job-form,
 .job-card {
   border: 1px solid #d8dee8;
   border-radius: 8px;
@@ -109,6 +110,83 @@ button:disabled {
   margin-top: 34px;
 }
 
+.job-form {
+  padding: 22px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+label span {
+  color: #4d5b6c;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #cfd7e3;
+  border-radius: 6px;
+  color: #18212f;
+  background: #ffffff;
+  font: inherit;
+}
+
+input,
+select {
+  height: 42px;
+  padding: 0 12px;
+}
+
+textarea {
+  min-height: 104px;
+  padding: 11px 12px;
+  resize: vertical;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #1f6f58;
+  outline: 3px solid rgba(31, 111, 88, 0.14);
+}
+
+.invalid {
+  border-color: #c2413d;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.form-message,
+.form-error {
+  color: #1f6f58;
+  font-weight: 700;
+}
+
+.form-error {
+  color: #c2413d;
+}
+
 .section-heading {
   display: flex;
   align-items: baseline;
@@ -200,5 +278,19 @@ dd {
 
   dl {
     grid-template-columns: 1fr;
+  }
+
+  .form-grid,
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }

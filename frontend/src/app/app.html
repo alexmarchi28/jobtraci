@@ -40,7 +40,118 @@
 
   <section class="jobs-section">
     <div class="section-heading">
-      <h2>Candidature demo</h2>
+      <h2>Nuova offerta</h2>
+      <span>POST /api/jobs</span>
+    </div>
+
+    <form class="job-form" [formGroup]="jobForm" (ngSubmit)="createJob()">
+      <div class="form-grid">
+        <label>
+          <span>Azienda</span>
+          <input
+            type="text"
+            formControlName="company"
+            placeholder="Acme Consulting"
+            [class.invalid]="isInvalid('company')"
+          />
+        </label>
+
+        <label>
+          <span>Ruolo</span>
+          <input
+            type="text"
+            formControlName="role"
+            placeholder="Junior .NET Developer"
+            [class.invalid]="isInvalid('role')"
+          />
+        </label>
+
+        <label>
+          <span>Sede</span>
+          <input
+            type="text"
+            formControlName="location"
+            placeholder="Milano / Ibrido"
+            [class.invalid]="isInvalid('location')"
+          />
+        </label>
+
+        <label>
+          <span>Data candidatura</span>
+          <input
+            type="date"
+            formControlName="applicationDate"
+            [class.invalid]="isInvalid('applicationDate')"
+          />
+        </label>
+
+        <label>
+          <span>Tipo contratto</span>
+          <select formControlName="contractType">
+            @for (contractType of contractTypes; track contractType) {
+              <option [value]="contractType">{{ contractType }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Stato</span>
+          <select formControlName="status">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>RAL minima</span>
+          <input type="number" formControlName="salaryMin" min="0" step="1000" placeholder="26000" />
+        </label>
+
+        <label>
+          <span>RAL massima</span>
+          <input type="number" formControlName="salaryMax" min="0" step="1000" placeholder="30000" />
+        </label>
+
+        <label>
+          <span>Referente</span>
+          <input type="text" formControlName="contactName" placeholder="HR Team" />
+        </label>
+
+        <label>
+          <span>Link annuncio</span>
+          <input type="url" formControlName="postingUrl" placeholder="https://..." />
+        </label>
+
+        <label class="full-width">
+          <span>Note</span>
+          <textarea
+            rows="4"
+            formControlName="notes"
+            placeholder="Dettagli utili, follow-up, impressioni..."
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="isSaving()">
+          {{ isSaving() ? 'Salvataggio...' : 'Aggiungi offerta' }}
+        </button>
+
+        @if (saveMessage()) {
+          <p class="form-message">{{ saveMessage() }}</p>
+        }
+
+        @if (saveError()) {
+          <p class="form-error">{{ saveError() }}</p>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="jobs-section">
+    <div class="section-heading">
+      <h2>Candidature</h2>
       <span>{{ jobs().length }} record da /api/jobs</span>
     </div>
 
