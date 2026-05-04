@@ -139,6 +139,24 @@ public sealed class JobsController : ControllerBase
         return Ok(updated);
     }
 
+    [HttpDelete("{id:int}")]
+    public IActionResult Delete(int id)
+    {
+        lock (JobsLock)
+        {
+            var index = Jobs.FindIndex(job => job.Id == id);
+
+            if (index < 0)
+            {
+                return NotFound();
+            }
+
+            Jobs.RemoveAt(index);
+        }
+
+        return NoContent();
+    }
+
     private static bool HasInvalidSalaryRange(decimal? salaryMin, decimal? salaryMax)
     {
         return salaryMin.HasValue &&

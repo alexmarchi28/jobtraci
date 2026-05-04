@@ -71,6 +71,7 @@ export class App {
   protected readonly saveMessage = signal<string | null>(null);
   protected readonly saveError = signal<string | null>(null);
   protected readonly editingJobId = signal<number | null>(null);
+  protected readonly deletingJobId = signal<number | null>(null);
 
   protected readonly jobForm = this.formBuilder.group({
     company: ['', [Validators.required, Validators.maxLength(120)]],
@@ -196,6 +197,35 @@ export class App {
     this.resetForm();
     this.saveMessage.set(null);
     this.saveError.set(null);
+  }
+
+  protected deleteJob(job: JobApplication): void {
+    const confirmed = confirm(`Eliminare l'offerta "${job.role}" di ${job.company}?`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.saveMessage.set(null);
+    this.saveError.set(null);
+    this.deletingJobId.set(job.id);
+
+    this.http.delete<void>(`${this.apiBaseUrl}/jobs/${job.id}`).subscribe({
+      next: () => {
+        this.jobs.update((jobs) => jobs.filter((candidate) => candidate.id !== job.id));
+
+        if (this.editingJobId() === job.id) {
+          this.resetForm();
+        }
+
+        this.saveMessage.set(`Offerta eliminata: ${job.company} - ${job.role}`);
+        this.deletingJobId.set(null);
+      },
+      error: () => {
+        this.saveError.set('Eliminazione non riuscita. Controlla che il backend sia avviato.');
+        this.deletingJobId.set(null);
+      }
+    });
   }
 
   protected isInvalid(controlName: keyof typeof this.jobForm.controls): boolean {

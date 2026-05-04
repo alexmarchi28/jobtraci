@@ -225,10 +225,18 @@ textarea:focus {
   padding: 22px;
 }
 
-.edit-job-button {
+.card-actions {
   position: absolute;
   top: 14px;
   right: 14px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease;
+}
+
+.card-action-button {
   display: inline-grid;
   width: 34px;
   height: 34px;
@@ -240,8 +248,6 @@ textarea:focus {
   color: #263445;
   background: #ffffff;
   box-shadow: 0 8px 22px rgba(30, 41, 59, 0.16);
-  opacity: 0;
-  pointer-events: none;
   transition: opacity 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
 }
 
@@ -251,17 +257,36 @@ textarea:focus {
   line-height: 1;
 }
 
-.job-card:hover .edit-job-button,
-.edit-job-button:focus-visible {
+.delete-job-button {
+  color: #9f2f2b;
+}
+
+.delete-job-button svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.job-card:hover .card-actions,
+.job-card:focus-within .card-actions {
   opacity: 1;
   pointer-events: auto;
 }
 
-.edit-job-button:hover,
-.edit-job-button:focus-visible {
+.card-action-button:hover,
+.card-action-button:focus-visible {
   border-color: #1f6f58;
   transform: translateY(-1px);
   outline: none;
+}
+
+.delete-job-button:hover,
+.delete-job-button:focus-visible {
+  border-color: #b6403b;
 }
 
 .job-card-header {
@@ -346,6 +371,11 @@ dd {
   }
 
   .edit-job-button {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .card-actions {
     opacity: 1;
     pointer-events: auto;
   }

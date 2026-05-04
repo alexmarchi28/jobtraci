@@ -170,13 +170,32 @@
     <div class="jobs-grid">
       @for (job of jobs(); track job.id) {
         <article class="job-card">
-          <button
-            class="edit-job-button"
-            type="button"
-            aria-label="Modifica offerta"
-            title="Modifica offerta"
-            (click)="beginEdit(job)"
-          ></button>
+          <div class="card-actions">
+            <button
+              class="card-action-button edit-job-button"
+              type="button"
+              aria-label="Modifica offerta"
+              title="Modifica offerta"
+              (click)="beginEdit(job)"
+            ></button>
+
+            <button
+              class="card-action-button delete-job-button"
+              type="button"
+              aria-label="Elimina offerta"
+              title="Elimina offerta"
+              [disabled]="deletingJobId() === job.id"
+              (click)="deleteJob(job)"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18" />
+                <path d="M8 6V4h8v2" />
+                <path d="M6 6l1 15h10l1-15" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+          </div>
 
           <div class="job-card-header">
             <div>
