@@ -1,4 +1,4 @@
-https://github.com/user-attachments/assets/5d084550-c14b-4ed4-981b-aa1e7dddb7df
+https://github.com/user-attachments/assets/0caabfb0-8048-424b-a859-4ef972fb0d1c
 
 # Job Tracker
 
