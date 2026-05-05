@@ -35,4 +35,18 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Candidature');
   });
+
+  it('should keep the application form closed until requested', () => {
+    const fixture = TestBed.createComponent(App);
+    httpTesting.expectOne('http://localhost:5000/api/jobs').flush([]);
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.job-form')).toBeNull();
+
+    compiled.querySelector<HTMLButtonElement>('.add-offer-strip')?.click();
+    fixture.detectChanges();
+
+    expect(compiled.querySelector('.job-form')).not.toBeNull();
+  });
 });

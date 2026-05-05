@@ -13,128 +13,177 @@
     </button>
   </header>
 
-  <section class="jobs-section">
-    <div class="section-heading">
-      <h2>{{ editingJobId() === null ? 'Nuova offerta' : 'Modifica offerta' }}</h2>
-      <span>{{ editingJobId() === null ? 'Aggiungi una nuova opportunità' : 'Aggiorna i dettagli salvati' }}</span>
-    </div>
+  <section class="dashboard-grid" aria-label="Riepilogo candidature">
+    <article class="metric-card">
+      <span>Offerte salvate</span>
+      <strong>{{ totalJobs() }}</strong>
+      <p>{{ totalJobs() === 1 ? 'opportunità monitorata' : 'opportunità monitorate' }}</p>
+    </article>
 
-    <form class="job-form" [class.editing]="editingJobId() !== null" [formGroup]="jobForm" (ngSubmit)="saveJob()">
-      <div class="form-grid">
-        <label>
-          <span>Azienda</span>
-          <input
-            type="text"
-            formControlName="company"
-            placeholder="Acme Consulting"
-            [class.invalid]="isInvalid('company')"
-          />
-        </label>
+    <article class="metric-card">
+      <span>Candidature inviate</span>
+      <strong>{{ sentApplications() }}</strong>
+      <p>{{ sentApplications() === 1 ? 'candidatura attiva' : 'candidature attive' }}</p>
+    </article>
 
-        <label>
-          <span>Ruolo</span>
-          <input
-            type="text"
-            formControlName="role"
-            placeholder="Junior .NET Developer"
-            [class.invalid]="isInvalid('role')"
-          />
-        </label>
+    <article class="metric-card">
+      <span>Follow-up da fare</span>
+      <strong>{{ followUpsDue() }}</strong>
+      <p>{{ followUpsDue() === 1 ? 'promemoria aperto' : 'promemoria aperti' }}</p>
+    </article>
+  </section>
 
-        <label>
-          <span>Sede</span>
-          <input
-            type="text"
-            formControlName="location"
-            placeholder="Milano / Ibrido"
-            [class.invalid]="isInvalid('location')"
-          />
-        </label>
+  <section class="add-offer-panel">
+    <button
+      class="add-offer-strip"
+      type="button"
+      (click)="toggleJobForm()"
+      [attr.aria-expanded]="isFormOpen()"
+    >
+      <span class="add-offer-icon" [class.add-offer-icon-open]="isFormOpen()" aria-hidden="true"></span>
+      <span>
+        <strong>
+          @if (editingJobId() !== null) {
+            Modifica in corso
+          } @else if (isFormOpen()) {
+            Chiudi inserimento
+          } @else {
+            Nuova candidatura
+          }
+        </strong>
+        <small>
+          @if (isFormOpen()) {
+            Nascondi i campi e torna alla lista.
+          } @else {
+            Aggiungi azienda, ruolo, stato e dettagli utili.
+          }
+        </small>
+      </span>
+    </button>
 
-        <label>
-          <span>Data candidatura</span>
-          <input
-            type="date"
-            formControlName="applicationDate"
-            [class.invalid]="isInvalid('applicationDate')"
-          />
-        </label>
+    @if (saveMessage()) {
+      <p class="form-message">{{ saveMessage() }}</p>
+    }
 
-        <label>
-          <span>Tipo contratto</span>
-          <select formControlName="contractType">
-            @for (contractType of contractTypes; track contractType) {
-              <option [value]="contractType">{{ contractType }}</option>
-            }
-          </select>
-        </label>
+    @if (saveError()) {
+      <p class="form-error">{{ saveError() }}</p>
+    }
+  </section>
 
-        <label>
-          <span>Stato</span>
-          <select formControlName="status">
-            @for (status of statuses; track status) {
-              <option [value]="status">{{ status }}</option>
-            }
-          </select>
-        </label>
-
-        <label>
-          <span>RAL minima</span>
-          <input type="number" formControlName="salaryMin" min="0" step="1000" placeholder="26000" />
-        </label>
-
-        <label>
-          <span>RAL massima</span>
-          <input type="number" formControlName="salaryMax" min="0" step="1000" placeholder="30000" />
-        </label>
-
-        <label>
-          <span>Referente</span>
-          <input type="text" formControlName="contactName" placeholder="HR Team" />
-        </label>
-
-        <label>
-          <span>Link annuncio</span>
-          <input type="url" formControlName="postingUrl" placeholder="https://..." />
-        </label>
-
-        <label class="full-width">
-          <span>Note</span>
-          <textarea
-            rows="4"
-            formControlName="notes"
-            placeholder="Dettagli utili, follow-up, impressioni..."
-          ></textarea>
-        </label>
+  @if (isFormOpen()) {
+    <section class="jobs-section form-section">
+      <div class="section-heading">
+        <h2>{{ editingJobId() === null ? 'Nuova offerta' : 'Modifica offerta' }}</h2>
+        <span>{{ editingJobId() === null ? 'Aggiungi una nuova opportunità' : 'Aggiorna i dettagli salvati' }}</span>
       </div>
 
-      <div class="form-actions">
-        <button type="submit" [disabled]="isSaving()">
-          @if (isSaving()) {
-            Salvataggio...
-          } @else if (editingJobId() === null) {
-            Aggiungi offerta
-          } @else {
-            Salva modifiche
-          }
-        </button>
+      <form class="job-form" [class.editing]="editingJobId() !== null" [formGroup]="jobForm" (ngSubmit)="saveJob()">
+        <div class="form-grid">
+          <label>
+            <span>Azienda</span>
+            <input
+              type="text"
+              formControlName="company"
+              placeholder="Acme Consulting"
+              [class.invalid]="isInvalid('company')"
+            />
+          </label>
 
-        @if (editingJobId() !== null) {
+          <label>
+            <span>Ruolo</span>
+            <input
+              type="text"
+              formControlName="role"
+              placeholder="Junior .NET Developer"
+              [class.invalid]="isInvalid('role')"
+            />
+          </label>
+
+          <label>
+            <span>Sede</span>
+            <input
+              type="text"
+              formControlName="location"
+              placeholder="Milano / Ibrido"
+              [class.invalid]="isInvalid('location')"
+            />
+          </label>
+
+          <label>
+            <span>Data candidatura</span>
+            <input
+              type="date"
+              formControlName="applicationDate"
+              [class.invalid]="isInvalid('applicationDate')"
+            />
+          </label>
+
+          <label>
+            <span>Tipo contratto</span>
+            <select formControlName="contractType">
+              @for (contractType of contractTypes; track contractType) {
+                <option [value]="contractType">{{ contractType }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Stato</span>
+            <select formControlName="status">
+              @for (status of statuses; track status) {
+                <option [value]="status">{{ status }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>RAL minima</span>
+            <input type="number" formControlName="salaryMin" min="0" step="1000" placeholder="26000" />
+          </label>
+
+          <label>
+            <span>RAL massima</span>
+            <input type="number" formControlName="salaryMax" min="0" step="1000" placeholder="30000" />
+          </label>
+
+          <label>
+            <span>Referente</span>
+            <input type="text" formControlName="contactName" placeholder="HR Team" />
+          </label>
+
+          <label>
+            <span>Link annuncio</span>
+            <input type="url" formControlName="postingUrl" placeholder="https://..." />
+          </label>
+
+          <label class="full-width">
+            <span>Note</span>
+            <textarea
+              rows="4"
+              formControlName="notes"
+              placeholder="Dettagli utili, follow-up, impressioni..."
+            ></textarea>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" [disabled]="isSaving()">
+            @if (isSaving()) {
+              Salvataggio...
+            } @else if (editingJobId() === null) {
+              Aggiungi offerta
+            } @else {
+              Salva modifiche
+            }
+          </button>
+
           <button class="secondary-button" type="button" (click)="cancelEdit()" [disabled]="isSaving()">
             Annulla
           </button>
-        }
-
-        @if (saveMessage()) {
-          <p class="form-message">{{ saveMessage() }}</p>
-        }
-
-        @if (saveError()) {
-          <p class="form-error">{{ saveError() }}</p>
-        }
-      </div>
-    </form>
-  </section>
+        </div>
+      </form>
+    </section>
+  }
 
   <section class="jobs-section">
     <div class="section-heading">

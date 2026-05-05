@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 interface JobApplication {
@@ -65,6 +65,14 @@ export class App {
   protected readonly saveError = signal<string | null>(null);
   protected readonly editingJobId = signal<number | null>(null);
   protected readonly deletingJobId = signal<number | null>(null);
+  protected readonly isFormOpen = signal(false);
+  protected readonly totalJobs = computed(() => this.jobs().length);
+  protected readonly sentApplications = computed(() =>
+    this.jobs().filter((job) => job.status === 'Candidatura inviata').length
+  );
+  protected readonly followUpsDue = computed(() =>
+    this.jobs().filter((job) => this.isFollowUpDue(job)).length
+  );
 
   protected readonly jobForm = this.formBuilder.group({
     company: ['', [Validators.required, Validators.maxLength(120)]],
@@ -100,6 +108,21 @@ export class App {
     });
   }
 
+  protected toggleJobForm(): void {
+    if (this.isFormOpen()) {
+      this.closeForm();
+      this.saveMessage.set(null);
+      this.saveError.set(null);
+      return;
+    }
+
+    this.resetForm();
+    this.saveMessage.set(null);
+    this.saveError.set(null);
+    this.isFormOpen.set(true);
+    this.scrollToForm();
+  }
+
   protected saveJob(): void {
     this.saveMessage.set(null);
     this.saveError.set(null);
@@ -129,6 +152,7 @@ export class App {
         next: (createdJob) => {
           this.jobs.update((jobs) => this.sortJobs([createdJob, ...jobs]));
           this.resetForm();
+          this.isFormOpen.set(false);
           this.saveMessage.set(`Offerta aggiunta: ${createdJob.company} - ${createdJob.role}`);
           this.isSaving.set(false);
         },
@@ -147,6 +171,7 @@ export class App {
           this.sortJobs(jobs.map((job) => job.id === updatedJob.id ? updatedJob : job))
         );
         this.resetForm();
+        this.isFormOpen.set(false);
         this.saveMessage.set(`Offerta aggiornata: ${updatedJob.company} - ${updatedJob.role}`);
         this.isSaving.set(false);
       },
@@ -159,6 +184,7 @@ export class App {
 
   protected beginEdit(job: JobApplication): void {
     this.editingJobId.set(job.id);
+    this.isFormOpen.set(true);
     this.saveMessage.set(null);
     this.saveError.set(null);
     this.jobForm.reset({
@@ -175,11 +201,11 @@ export class App {
       notes: job.notes ?? ''
     });
 
-    document.querySelector('.job-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.scrollToForm();
   }
 
   protected cancelEdit(): void {
-    this.resetForm();
+    this.closeForm();
     this.saveMessage.set(null);
     this.saveError.set(null);
   }
@@ -200,7 +226,7 @@ export class App {
         this.jobs.update((jobs) => jobs.filter((candidate) => candidate.id !== job.id));
 
         if (this.editingJobId() === job.id) {
-          this.resetForm();
+          this.closeForm();
         }
 
         this.saveMessage.set(`Offerta eliminata: ${job.company} - ${job.role}`);
@@ -217,6 +243,17 @@ export class App {
     const control = this.jobForm.controls[controlName];
 
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  private closeForm(): void {
+    this.resetForm();
+    this.isFormOpen.set(false);
+  }
+
+  private scrollToForm(): void {
+    setTimeout(() => {
+      document.querySelector('.job-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }
 
   private buildCreatePayload(): SaveJobApplicationPayload {
@@ -270,5 +307,17 @@ export class App {
 
   private todayIsoDate(): string {
     return new Date().toISOString().slice(0, 10);
+  }
+
+  private isFollowUpDue(job: JobApplication): boolean {
+    if (job.status !== 'Candidatura inviata' && job.status !== 'Colloquio') {
+      return false;
+    }
+
+    const applicationDate = new Date(`${job.applicationDate}T00:00:00`);
+    const ageInMilliseconds = Date.now() - applicationDate.getTime();
+    const ageInDays = ageInMilliseconds / (1000 * 60 * 60 * 24);
+
+    return ageInDays >= 7;
   }
 }
