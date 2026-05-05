@@ -12,22 +12,21 @@
   padding: 48px 0;
 }
 
-.status-panel,
-.connection,
 .job-form,
 .job-card {
   border: 1px solid #d8dee8;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 12px 36px rgba(30, 41, 59, 0.08);
 }
 
-.status-panel {
+.app-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
-  padding: 28px;
+  padding: 8px 0 30px;
+  border-bottom: 1px solid #d8dee8;
 }
 
 .eyebrow {
@@ -48,14 +47,14 @@ p {
 
 h1 {
   max-width: 720px;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(2rem, 4vw, 2.8rem);
   line-height: 1.02;
   font-weight: 760;
 }
 
 .lead {
   max-width: 680px;
-  margin-top: 16px;
+  margin-top: 12px;
   color: #5d6a7c;
   font-size: 1rem;
   line-height: 1.6;
@@ -66,7 +65,7 @@ button {
   padding: 0 16px;
   border: 0;
   border-radius: 6px;
-  color: #ffffff;
+  color: #fff;
   background: #1f6f58;
   font-weight: 700;
   cursor: pointer;
@@ -80,35 +79,6 @@ button:disabled {
 .secondary-button {
   color: #263445;
   background: #e7ecf3;
-}
-
-.connection {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-  margin-top: 20px;
-  padding: 18px 20px;
-}
-
-.connection p {
-  margin-top: 4px;
-  color: #66758a;
-}
-
-.connection-dot {
-  width: 12px;
-  height: 12px;
-  margin-top: 5px;
-  border-radius: 50%;
-  background: #a8b3c2;
-}
-
-.connection-ok .connection-dot {
-  background: #1f9d72;
-}
-
-.connection-error .connection-dot {
-  background: #c2413d;
 }
 
 .jobs-section {
@@ -149,7 +119,7 @@ textarea {
   border: 1px solid #cfd7e3;
   border-radius: 6px;
   color: #18212f;
-  background: #ffffff;
+  background: #fff;
   font: inherit;
 }
 
@@ -195,6 +165,12 @@ textarea:focus {
 
 .form-error {
   color: #c2413d;
+}
+
+.load-error {
+  margin-bottom: 16px;
+  color: #c2413d;
+  font-weight: 700;
 }
 
 .section-heading {
@@ -246,15 +222,13 @@ textarea:focus {
   border: 1px solid #cfd7e3;
   border-radius: 50%;
   color: #263445;
-  background: #ffffff;
+  background: #fff;
   box-shadow: 0 8px 22px rgba(30, 41, 59, 0.16);
   transition: opacity 0.16s ease, transform 0.16s ease, border-color 0.16s ease;
 }
 
 .edit-job-button::before {
   content: "\270E";
-  font-size: 1rem;
-  line-height: 1;
 }
 
 .delete-job-button {
@@ -343,7 +317,7 @@ dd {
 }
 
 @media (max-width: 760px) {
-  .status-panel,
+  .app-header,
   .section-heading {
     flex-direction: column;
   }
@@ -356,11 +330,6 @@ dd {
     grid-template-columns: 1fr;
   }
 
-  .form-grid,
-  .form-actions {
-    grid-template-columns: 1fr;
-  }
-
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -368,11 +337,6 @@ dd {
   .form-actions {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .edit-job-button {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   .card-actions {
