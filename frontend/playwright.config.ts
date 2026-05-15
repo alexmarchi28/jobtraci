@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const frontendUrl = 'http://localhost:4200';
+const backendUrl = 'http://localhost:5000';
+
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
@@ -25,8 +28,14 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: 'http://localhost:4200',
+    /*
+     * Base URL to use in actions like `await page.goto('/')`.
+     *
+     * This is the Angular dev server, not the ASP.NET Core API.
+     * Keeping it here lets tests navigate with relative paths instead of
+     * repeating `http://localhost:4200` in every spec file.
+     */
+    baseURL: frontendUrl,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
@@ -70,10 +79,27 @@ export default defineConfig({
     // },
   ],
 
-  /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://localhost:4200',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  /*
+   * Run the local full-stack app before starting the tests.
+   *
+   * Playwright starts both processes, waits until their URLs answer, and only
+   * then begins the tests. Locally `reuseExistingServer` is useful because you
+   * might already have the API/frontend open while experimenting.
+   */
+  webServer: [
+    {
+      name: 'backend',
+      command: 'dotnet run --project ../JobTracker.Api/JobTracker.Api.csproj --launch-profile http',
+      url: `${backendUrl}/api/health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+    {
+      name: 'frontend',
+      command: 'npm run start -- --host localhost --port 4200',
+      url: frontendUrl,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+    },
+  ],
 });
